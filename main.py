@@ -59,7 +59,7 @@ def loadCSV(filename, image_height, image_width):
 if __name__ == '__main__':
 
     if(len(sys.argv) < 2):
-        print("Usage: script filename.csv imagesize")
+        print("Usage: script filename.csv")
         exit(1)
 
     file = sys.argv[1]
