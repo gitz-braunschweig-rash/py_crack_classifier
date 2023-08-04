@@ -3,9 +3,10 @@ import csv
 import sys
 import cv2
 import shutil
+import argparse
 
 
-def loadCSV(filename, image_height, image_width):
+def loadCSV(filename, output_folder, image_height, image_width):
     # Use a breakpoint in the code line below to debug your script.
     width_row = 0.0
     height_row = 0.0
@@ -49,23 +50,38 @@ def loadCSV(filename, image_height, image_width):
 
             counter = counter+1
 
+    filename_escaped = filename.replace("/", "_")
+    filename_escaped = filename_escaped.replace("\\", "_")
+    f = open(output_folder+"/"+filename_escaped+".txt", "a")
+
     for element in width_height_x_y:
         #print(element)
         if(element["ratio"] > 3 and element["fillratio"] < 0.6 and float(element["area"]) < maximum_allowed_crackarea):
             print(element)
-            shutil.copyfile("images/"+element["id"]+".png", "crack/"+element["id"]+".png")
+            shutil.copyfile("images/"+element["id"]+".png", output_folder+"/"+element["id"]+".png")
+            f.write(str(element))
 
+    f.close()
 
 if __name__ == '__main__':
 
-    if(len(sys.argv) < 2):
-        print("Usage: script filename.csv")
-        exit(1)
+    #if(len(sys.argv) < 2):
+    #    print("Usage: script image_folder_with_csv_file/ output_folder")
+    #    exit(1)
 
-    file = sys.argv[1]
+    parser = argparse.ArgumentParser(description='Process some integers.')
+
+    parser.add_argument('--image_folder', help='folder of the images')
+    parser.add_argument('--output_folder', help='folder for the result (crack length)')
+    args = parser.parse_args()
+
+    image_folder = args.image_folder
+    output_folder = args.output_folder
+
+    file = image_folder+"/metadata.csv"
     #image_height = sys.argv[2]
 
-    im = cv2.imread('images/0.png')
+    im = cv2.imread(image_folder+'/0.png')
     h, w, c = im.shape
     image_height = h
-    loadCSV(file,image_height,w)
+    loadCSV(file,output_folder,image_height,w)
