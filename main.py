@@ -4,6 +4,7 @@ import sys
 import cv2
 import shutil
 import argparse
+import pickle
 
 
 def loadCSV(filename, output_folder, image_height, image_width):
@@ -52,16 +53,20 @@ def loadCSV(filename, output_folder, image_height, image_width):
 
     filename_escaped = filename.replace("/", "_")
     filename_escaped = filename_escaped.replace("\\", "_")
-    f = open(output_folder+"/"+filename_escaped+".txt", "a")
+    #f = open(output_folder+"/"+filename_escaped+".pkl", "wb")
 
-    for element in width_height_x_y:
-        #print(element)
-        if(element["ratio"] > 3 and element["fillratio"] < 0.6 and float(element["area"]) < maximum_allowed_crackarea):
-            print(element)
-            shutil.copyfile("images/"+element["id"]+".png", output_folder+"/"+element["id"]+".png")
-            f.write(str(element))
+    best_crack_candidate = {}
 
-    f.close()
+    with open(output_folder+"/"+filename_escaped+".pkl", "wb") as f:
+
+        for element in width_height_x_y:
+            #print(element)
+            if(element["ratio"] > 3 and element["fillratio"] < 0.6 and float(element["area"]) < maximum_allowed_crackarea):
+                print(element)
+                shutil.copyfile("images/"+element["id"]+".png", output_folder+"/"+element["id"]+".png")
+                #f.write(str(element))
+                pickle.dump(element,f)
+        f.close()
 
 if __name__ == '__main__':
 
