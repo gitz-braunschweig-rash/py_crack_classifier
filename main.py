@@ -7,6 +7,16 @@ import argparse
 import pickle
 
 
+def getScore(dict_element,image_height,image_width):
+    score = 0
+    score_height = image_height / (image_height + int(dict_element["height"])) * dict_element["ratio"] #smaller cracks are better
+    score_center = score - abs((int(dict_element["y"]) + float(dict_element["height"])/2) - (image_height/2)) #cracks which are closer to the middle are better
+    score_fillrate = score + dict_element["ratio"]*(image_height*image_width / (image_height*image_width/10) / int(dict_element["area"])) # smaller cracks with high x to y ration are long and good
+
+    score = score_center + score_height + dict_element["ratio"] + (score_fillrate / abs(score_fillrate / score_center + score_height))
+    return score
+
+
 def loadCSV(filename, output_folder, image_height, image_width):
     # Use a breakpoint in the code line below to debug your script.
     width_row = 0.0
@@ -55,17 +65,25 @@ def loadCSV(filename, output_folder, image_height, image_width):
     filename_escaped = filename_escaped.replace("\\", "_")
     #f = open(output_folder+"/"+filename_escaped+".pkl", "wb")
 
-    best_crack_candidate = {}
+    best_score = 0
+    best_id = 0
+    best_element = {}
 
-    with open(output_folder+"/"+filename_escaped+".pkl", "wb") as f:
+    for element in width_height_x_y:
+        if (element["ratio"] > 3 and element["fillratio"] < 0.6 and float(element["area"]) < maximum_allowed_crackarea):
+            score = getScore(element,image_height,image_width)
+            #print(str(element) + ": "+ str(score))
+            if(score > best_score):
+                best_score = score
+                best_id = element["id"]
 
         for element in width_height_x_y:
-            #print(element)
-            if(element["ratio"] > 3 and element["fillratio"] < 0.6 and float(element["area"]) < maximum_allowed_crackarea):
-                print(element)
-                shutil.copyfile("images/"+element["id"]+".png", output_folder+"/"+element["id"]+".png")
-                #f.write(str(element))
-                pickle.dump(element,f)
+            if(element["id"] == best_id):
+                best_element = element
+    with open(output_folder+"/"+filename_escaped+".pkl", "wb") as f:
+        print(best_element)
+        shutil.copyfile("images/"+best_element["id"]+".png", output_folder+"/"+best_element["id"]+".png")
+        pickle.dump(best_element,f)
         f.close()
 
 if __name__ == '__main__':
