@@ -89,8 +89,9 @@ def loadCSV(image_folder, output_folder, image_height, image_width,fileid=""):
         return
 
     with open(output_folder+"/"+filename_escaped+fileid+".pkl", "wb") as f:
-        print(best_element)
-        shutil.copyfile(image_folder+"/"+best_element["id"]+".png", output_folder+"/"+best_element["id"]+fileid+".png")
+        print(filename + ": " + fileid + ":" + str(best_element))
+
+        shutil.copyfile(image_folder+"/"+best_element["id"]+".png", output_folder+"/"+filename_escaped+fileid+"_"+best_element["id"]+".png")
         pickle.dump(best_element,f)
         f.close()
 
