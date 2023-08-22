@@ -65,8 +65,10 @@ def loadCSV(filename, output_folder, image_height, image_width,fileid=""):
     filename_escaped = filename_escaped.replace("\\", "_")
     #f = open(output_folder+"/"+filename_escaped+".pkl", "wb")
 
+    #print(localdict)
+
     best_score = 0
-    best_id = 0
+    best_id = -1
     best_element = {}
 
     for element in width_height_x_y:
@@ -80,6 +82,11 @@ def loadCSV(filename, output_folder, image_height, image_width,fileid=""):
         for element in width_height_x_y:
             if(element["id"] == best_id):
                 best_element = element
+
+    if not best_element:
+        print("There is no best element in metadata file. Skipping the file " + filename)
+        return
+
     with open(output_folder+"/"+filename_escaped+fileid+".pkl", "wb") as f:
         print(best_element)
         shutil.copyfile("images/"+best_element["id"]+".png", output_folder+"/"+best_element["id"]+fileid+".png")
@@ -113,4 +120,7 @@ if __name__ == '__main__':
     im = cv2.imread(image_folder+'/0.png')
     h, w, c = im.shape
     image_height = h
+
+    print("loadCSV("+file+","+output_folder+","+str(image_height)+","+str(w)+", " + fileid+")")
+
     loadCSV(file,output_folder,image_height,w, fileid)
