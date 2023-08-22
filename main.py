@@ -17,7 +17,8 @@ def getScore(dict_element,image_height,image_width):
     return score
 
 
-def loadCSV(filename, output_folder, image_height, image_width,fileid=""):
+def loadCSV(image_folder, output_folder, image_height, image_width,fileid=""):
+    filename = image_folder+"/metadata.csv"
     # Use a breakpoint in the code line below to debug your script.
     width_row = 0.0
     height_row = 0.0
@@ -89,7 +90,7 @@ def loadCSV(filename, output_folder, image_height, image_width,fileid=""):
 
     with open(output_folder+"/"+filename_escaped+fileid+".pkl", "wb") as f:
         print(best_element)
-        shutil.copyfile("images/"+best_element["id"]+".png", output_folder+"/"+best_element["id"]+fileid+".png")
+        shutil.copyfile(image_folder+"/"+best_element["id"]+".png", output_folder+"/"+best_element["id"]+fileid+".png")
         pickle.dump(best_element,f)
         f.close()
 
@@ -121,6 +122,6 @@ if __name__ == '__main__':
     h, w, c = im.shape
     image_height = h
 
-    print("loadCSV("+file+","+output_folder+","+str(image_height)+","+str(w)+", " + fileid+")")
+    print("loadCSV("+image_folder+","+output_folder+","+str(image_height)+","+str(w)+", " + fileid+")")
 
-    loadCSV(file,output_folder,image_height,w, fileid)
+    loadCSV(image_folder,output_folder,image_height,w, fileid)
