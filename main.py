@@ -17,7 +17,7 @@ def getScore(dict_element,image_height,image_width):
     return score
 
 
-def loadCSV(filename, output_folder, image_height, image_width):
+def loadCSV(filename, output_folder, image_height, image_width,fileid=""):
     # Use a breakpoint in the code line below to debug your script.
     width_row = 0.0
     height_row = 0.0
@@ -80,9 +80,9 @@ def loadCSV(filename, output_folder, image_height, image_width):
         for element in width_height_x_y:
             if(element["id"] == best_id):
                 best_element = element
-    with open(output_folder+"/"+filename_escaped+".pkl", "wb") as f:
+    with open(output_folder+"/"+filename_escaped+fileid+".pkl", "wb") as f:
         print(best_element)
-        shutil.copyfile("images/"+best_element["id"]+".png", output_folder+"/"+best_element["id"]+".png")
+        shutil.copyfile("images/"+best_element["id"]+".png", output_folder+"/"+best_element["id"]+fileid+".png")
         pickle.dump(best_element,f)
         f.close()
 
@@ -94,12 +94,18 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Process some integers.')
 
-    parser.add_argument('--image_folder', help='folder of the images')
-    parser.add_argument('--output_folder', help='folder for the result (crack length)')
+    parser.add_argument('--image_folder', help='folder of the images', required=True)
+    parser.add_argument('--output_folder', help='folder for the result (crack length)', required=True)
+    parser.add_argument('--id', help='id to append to the filename', required=False)
     args = parser.parse_args()
 
     image_folder = args.image_folder
     output_folder = args.output_folder
+
+    fileid = ""
+
+    if(args.id is not None):
+        fileid = "_" + str(args.id)
 
     file = image_folder+"/metadata.csv"
     #image_height = sys.argv[2]
@@ -107,4 +113,4 @@ if __name__ == '__main__':
     im = cv2.imread(image_folder+'/0.png')
     h, w, c = im.shape
     image_height = h
-    loadCSV(file,output_folder,image_height,w)
+    loadCSV(file,output_folder,image_height,w, fileid)
