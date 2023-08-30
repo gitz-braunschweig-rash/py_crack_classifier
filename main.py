@@ -6,6 +6,61 @@ import shutil
 import argparse
 import pickle
 
+def countWhitePixelsInYDirectionCached(image, x):
+    counter = 0
+    img = image
+
+    rows, cols = img.shape
+
+    for i in range(rows):
+            pixel_value = img[i, x]
+            #print(type(pixel_value))
+            if(pixel_value > 0):
+                counter += 1
+
+    return counter
+def countWhitePixelsInYDirection(image_id, x):
+    counter = 0
+    filename = str(image_id) + ".png"
+    img = cv2.imread(filename,cv2.IMREAD_GRAYSCALE)
+
+    rows, cols = img.shape
+
+    for i in range(rows):
+            pixel_value = img[i, x]
+            #print(type(pixel_value))
+            if(pixel_value > 0):
+                counter += 1
+
+    return counter
+
+def getPercentileHeight(image_id, data, pencentile=0.8):
+
+    start_x = int(data["x"])
+    end_x = start_x + int(data["width"])
+
+    start_y = int(data["y"])
+    end_y = start_y + int(data["height"])
+
+    heights = []
+
+    filename = str(image_id) + ".png"
+    print(filename)
+    img = cv2.imread(filename,cv2.IMREAD_GRAYSCALE)
+
+    for i in range(start_x,end_x):
+        #heights.append(countWhitePixelsInYDirection(image_id,i))
+        heights.append(countWhitePixelsInYDirectionCached(img, i))
+
+    heights.sort()
+
+    element_index = int(len(heights) * pencentile)
+
+    return heights[element_index]
+
+
+
+
 
 def getScore(dict_element,image_height,image_width):
     score = 0
@@ -57,6 +112,9 @@ def loadCSV(image_folder, output_folder, image_height, image_width,fileid=""):
                         localdict["id"] = element
                 localdict["ratio"] = float(localdict["width"]) / float(localdict["height"])
                 localdict["fillratio"] = float(localdict["height"]) / float(image_height)
+                localdict["height_value"] = getPercentileHeight(image_folder+"/"+localdict["id"],localdict)
+                localdict["height_ratio"] = float(localdict["height_value"]) / float(image_height)
+                print(localdict["id"] + ". Height Value: " + str(localdict["height_value"]))
 
                 width_height_x_y.append(localdict)
 
@@ -73,7 +131,9 @@ def loadCSV(image_folder, output_folder, image_height, image_width,fileid=""):
     best_element = {}
 
     for element in width_height_x_y:
-        if (element["ratio"] > 3 and element["fillratio"] < 0.6 and float(element["area"]) < maximum_allowed_crackarea):
+        print(element)
+        #if (element["ratio"] > 3 and element["fillratio"] < 0.6 and float(element["area"]) < maximum_allowed_crackarea):
+        if (element["ratio"] > 3 and element["height_ratio"] < 0.5 and float(element["area"]) < maximum_allowed_crackarea):
             score = getScore(element,image_height,image_width)
             #print(str(element) + ": "+ str(score))
             if(score > best_score):
