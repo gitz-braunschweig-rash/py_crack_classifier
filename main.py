@@ -59,17 +59,18 @@ def getPercentileHeight(image_id, data, pencentile=0.8):
     return heights[element_index]
 
 
-
-
-
 def getScore(dict_element,image_height,image_width):
     score = 0
     score_height = image_height / (image_height + int(dict_element["height"])) * dict_element["ratio"] #smaller cracks are better
-    score_center = score - abs((int(dict_element["y"]) + float(dict_element["height"])/2) - (image_height/2)) #cracks which are closer to the middle are better
-    score_fillrate = score + dict_element["ratio"]*(image_height*image_width / (image_height*image_width/10) / int(dict_element["area"])) # smaller cracks with high x to y ration are long and good
+    #score_center = score - abs((int(dict_element["y"]) + float(dict_element["height"])/2) - (image_height/2)) #cracks which are closer to the middle are better
+    score_center = 0 #median of the crack pixels to the center of the image
+    #score_fillrate = score + dict_element["ratio"]*(image_height*image_width / (image_height*image_width/10) / int(dict_element["area"])) # smaller cracks with high x to y ration are long and good
+    score_fillrate = 0
 
-    score = score_center + score_height + dict_element["ratio"] + (score_fillrate / abs(score_fillrate / score_center + score_height))
-    return score
+    #score = score_center + score_height + dict_element["ratio"] + (score_fillrate / abs(score_fillrate / score_center + score_height))
+    #return score
+
+    return score_height
 
 
 def loadCSV(image_folder, output_folder, image_height, image_width,fileid=""):
@@ -126,12 +127,11 @@ def loadCSV(image_folder, output_folder, image_height, image_width,fileid=""):
 
     #print(localdict)
 
-    best_score = 0
+    best_score = -(sys.float_info.max-1)
     best_id = -1
     best_element = {}
 
     for element in width_height_x_y:
-        print(element)
         #if (element["ratio"] > 3 and element["fillratio"] < 0.6 and float(element["area"]) < maximum_allowed_crackarea):
         if (element["ratio"] > 3 and element["height_ratio"] < 0.5 and float(element["area"]) < maximum_allowed_crackarea):
             score = getScore(element,image_height,image_width)
@@ -144,8 +144,10 @@ def loadCSV(image_folder, output_folder, image_height, image_width,fileid=""):
             if(element["id"] == best_id):
                 best_element = element
 
+    print(best_element)
+
     if not best_element:
-        print("There is no best element in metadata file. Skipping the file " + filename)
+        print("There is no best element in this dataset. Skipping the file " + filename)
         return
 
     with open(output_folder+"/"+filename_escaped+"_fileid_"+fileid+".pkl", "wb") as f:
