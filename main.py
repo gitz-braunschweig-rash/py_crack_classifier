@@ -6,6 +6,35 @@ import shutil
 import argparse
 import pickle
 
+def crack_median_height(image,x):
+    rows, cols = image.shape
+    
+    crack_med = getPercentileHeight(image,x,0.5)    #get median height of bbox
+
+    for i in range(rows):
+        pixel_value1 = image[i,0]                   #get left most lowest pixel
+        pixel_value2= image[i,"bbox_w"]             #get right most lowest pixel
+        if(pixel_value1 > 0):
+            x1 = i
+        if(pixel_value2 > 0):
+            x2 = i
+
+    med = ((x1 + x2)/2) + crack_med                 #average lowest pixel + median = median height
+
+    return med
+
+def distance_crack_to_center(image,x):
+    rows,cols = image.shape
+    crack = crack_median_height(image,x)            #get y coordinate of crackcenter
+    mid = rows/2                                    #get center of picture
+
+    distance = crack - mid                          #calculate distance
+    if(distance < 0):                               #absolute value (ich hab keine ahnung welche funktion es von python dafür gibt)
+        distance = 0 - distance
+
+    return distance
+    
+
 def countWhitePixelsInYDirectionCached(image, x):
     counter = 0
     img = image
@@ -19,6 +48,7 @@ def countWhitePixelsInYDirectionCached(image, x):
                 counter += 1
 
     return counter
+
 def countWhitePixelsInYDirection(image_id, x):
     counter = 0
     filename = str(image_id) + ".png"
